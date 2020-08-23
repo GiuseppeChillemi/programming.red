@@ -5,6 +5,8 @@ v0.9, 23/08/2020
 
 Project is now near to be complete
 
+
+
 == Introduction
 
 Displaying data organized as a list of rows and columns is a common way of consulting information and make a selection for the human being. Computers are a very powerful instrument for working on these lists which could be displayed, edited, stored and retrieved, and used as a starting point for further operations. 
@@ -21,7 +23,7 @@ This Document is based on Vid Extension Kit and R3 Text Table specification.
 From the END-USER side, there are some basic List-View interactions that are universal among all computer systems. The user expects them to be there and they are all the basic core a List-View Widget:
 
 ==== List of expected functions
- 
+
 * One or multiple selectable rows/columns
 * Speed to display millions of rows
 * Multi-selection via qualifier or just via progressive LMB clicks
@@ -142,7 +144,7 @@ To configure the LIST-VIEW a VID Dialect is needed to express all the required p
 
 `list-view data data-list input [] output [] options [] extra []`
 
-===== The basic configuration and the DATA block
+=== The basic configuration and the DATA block
 
 To setup the widget the amount of configuration should be minimal with all implicit configuration set to a default working:
 
@@ -152,7 +154,7 @@ Should be enough to display a block with 1 or more column elements where there i
 
 When such a simple view is not sufficient, additional elements of the dialect will come in help.
 
-===== The Input Block
+=== The Input Block
 
 This block contains the specification of the input data
 
@@ -174,7 +176,7 @@ in
 
 The remaining part of the dialect will control all the other aspects of the list-view
 
-===== The output Block
+=== The output Block
 
 This block will control all the column related functions, like the visibility and position, header names and so on.
 
@@ -189,7 +191,7 @@ the `output` block format is:
 *Other cell-specific cell information must be analyzed and its format established*
 
 
-====== The OPTIONS block
+=== The OPTIONS block
 
 It regulates all the aspects of the list which are not cell specific
 
@@ -197,19 +199,19 @@ It regulates all the aspects of the list which are not cell specific
 
 In the example: Selection mode will be set to MUTEX and scroll steps to PAGE.
 
-====== Extras
+=== Extras
 
 Will contain extra list-view configuration data when they do not fit to other elements.
 
 
 
-==== Accessing data
+=== Accessing data
 
 As expressed, the developer should be able to use coordinates by `row-number/column-name|index` or via Vector `AxB`. One dimensional coordinate refers to a row.
 
 Selected index will be returned as block in `face/selected` *facet* *accessor*. RED `text-list` datatype returns only `none|integer`on `face/selected` as there is no multiselection. I propose `none|[indexes]` to support multi-selection but `none|index|[indexes]` is welcome too if we could choose one or another working at SETUP.
 
-==== Resetting the list
+=== Resetting the list
 
 A function like
 
@@ -221,33 +223,33 @@ Or any other that suits to the adopted model, will create a list-view with setup
 
 The following is the complete features list of the `list-view`. The corresponding VID dialect keywords and arguments are not there but few. During the development, they will be defined.
 
-==== defaults
+=== Defaults
 
-During editing cell defaults could be provided
+When specific but necessary configuration element are not provided the LIST-VIEW widget should use default one
 
-==== Database data storing and retrieving
+=== Database data storing and retrieving
 
 A paged data interface reading/writing/quering should be planned.,
 To the server will delegated some time consuming operations (IE: querying the table)
 
 A connection format should be established
 
-==== RTF-Text
+=== RTF-Text
 
 Rich text format must be accepted so the table could have significant colors and font based on data content (example: `row/field > 10.000` should be green, `row/loss > 20` should be bold red. 
 
-==== Auto size
+=== Auto size
 
 Depending on columns size and data content the gui will auto setup.
 If columns are positionend beyond the rightmost edge a scroll bar will be added.
 
-==== Auto Redraw on GUI resize.
+=== Auto Redraw on GUI resize.
 
 If requested from the user the initial size will adapt to the new GUI size.
 
-==== Columns
+=== Columns
 
-===== Column names 
+==== Column names 
 
 All output columns should be accessible by their positional numbers in any situation.
 
@@ -299,7 +301,7 @@ data: [[1 2 3][5 6 7]]
 list-view data x input [a b c] output [a "one" #1 "two" b #2 "three" c #3]
 ```
 
-===== Column size 
+==== Column size 
 
 Size of each column could be fixed or user-editable. Their value in the `output` block or calculated if omitted.
 
@@ -314,11 +316,11 @@ If a position is expressed the corresponding column will get the size
 `[#2 100 #1 #3 100]`
 
 
-===== Column size adaption
+==== Column size adaption
  
 Double click on column separator on heading to adapt to its content (but with limit on max size)
 
-===== Columns separator
+==== Columns separator
 
 If a
 
@@ -326,7 +328,7 @@ If a
 
 Is present between output column names vertical borderline will be inserted between columns
 
-===== Column sorting
+==== Column sorting
 
 * Columns could be sorted and unsorted.
 
@@ -345,7 +347,7 @@ Sort direction of the choosen column
 * default-sort-column
 The column to sort at startup
 
-===== Columns/Cell Datatype
+==== Columns/Cell Datatype
 
 The cell datatype is established from the input data.
 
@@ -355,37 +357,37 @@ It is unclear a target datatype should be adopted with autoconversion at input.
 
 * Having different data sources than red blocks
 
-===== Column moving/hiding/unhide
+==== Column moving/hiding/unhide
 
 User and developers should be able to move columns, hide, and restore them.
 
-===== Highlighted sort column 
+==== Highlighted sort column 
 
 The sorting column(s) should be highlighted
 
-===== calculated VIRTUAL columns
+==== calculated VIRTUAL columns
 
 Not all columns should come from the original data. Calculated virtual columns/data should be implemented.
 
 Cells with calculated columns or graphic
 
-==== Cell Section
+=== Cell Section
 
-===== Cell apparence
+==== Cell apparence
 
 Developers should be able to pass a function which changes the appearance of the cell (font/font color/background color/style) depending on its data content
 
 Different cell drawing (frames,content)
 
-===== Cell Justification
+==== Cell Justification
 
 `justification LEFT|CENTER|RIGHT`
 
-===== Cell Editors
+==== Cell Editors
 
 Custom cell editor should be expressed in a datatype basis or datatype/column
 
-===== CELL datatype (Basic, other at the discretion of the developer)
+==== CELL datatype (Basic, other at the discretion of the developer)
 
 It will support:
 - Text
@@ -398,7 +400,7 @@ It will support:
 
 
 
-===== Cell with buttons/multi-list
+==== Cell with buttons/multi-list
 
 Each cell could have buttons, buttons + data, active corners, multi-list choice.
 
@@ -406,19 +408,19 @@ Button with GIF and 2 states
 
 Column with button on its side
 
-===== Custom Cells
+==== Custom Cells
 
 TO BE WRITTEN
 
-====  List Geometry and columns
+===  List Geometry and columns
 
 The number and name of columns is established as follow:
 
 If the datatype content has no explicit column names they must be provided using a separate `input` block. If the block has not ROW limits (a flat element) the ROW length correspond to the number of words in the `input` element.  Otherwise, it will be retrieved from the data. If column length mismatches from the input element an error should be thrown, otherwise columns with default type should be created.
 
-==== Selecting elements
+=== Selecting elements
 
-===== Selection Modes
+==== Selection Modes
 
 The selection modes available will be expressed in the options block al follow
 
@@ -430,9 +432,7 @@ This is either:
 * PERSISTENT, which allows selecting multiple rows without using a qualifier key or 
 * MULTI (default), which allows selecting multiple rows using CTRL or SHIFT as qualifier keys. 
 
-
-
-===== Current position/selection
+==== Current position/selection
 
 The developer should be able to select one or more rows/columns via
 
@@ -452,11 +452,11 @@ A corresponding `select-column` should be implemented (if proper `select-face` d
 
 
 
-==== Data managing, Data Editing
+=== Data managing, Data Editing
 
 'ADD 'DELETE 'SET
 
-===== Editing
+==== Editing
 
 * Cell must be editable either in place or vie editors
 
@@ -466,13 +466,13 @@ Some cell/column should be editable, some other not
 
 * Single cell highlight!
 
-===== Rows inserting/deletion/moving
+==== Rows inserting/deletion/moving
 
 Basic row deletion/adding/moving up and down should be provided.
 
 The action could happen via accessors or operating on the original data
 
-===== Custom elements/sublists/custom rendering
+==== Custom elements/sublists/custom rendering
 
 The following chapter comes from Vid Extension Kit 
 
@@ -490,7 +490,7 @@ This is a layout block for each row used in the layout. When using this, you can
 
 This is a function body that uses FACE and CELL as argument. The FACE is the list face inside the data list. The CELL is the cell that is currently being rendered.
 
-===== Getting Data
+==== Getting Data
 
 * Array with selected rows
 
@@ -500,19 +500,19 @@ Get what is selected
 
  
 
-==== Basic Add/Remove/Delete (Even multi) with position maintaining 
+=== Basic Add/Remove/Delete (Even multi) with position maintaining 
 
 To be written
 
-==== Position keeping on developer actions like insert-delete
+=== Position keeping on developer actions like insert-delete
 
 To be written
 
-==== Storing position
+=== Storing position
 
 It should be possible to store/retrieve The internal data like cursor position/columns displayed/size. It is needed for gui transitions.
 
-==== Input data validation
+=== Input data validation
 
 The data being input by the user should be validate with developer provided validator function.
 
@@ -522,7 +522,7 @@ It must be established where such valuation function will be expressed but `outp
 
 Validation for the whole row should be possibile
 
-==== Filtering
+=== Filtering
 
 Data could be displayed as it is or filtered using a function
 
@@ -530,37 +530,37 @@ The user should be able to enter filters in a row of fields at the top or the bo
 
 The developer will use a function to filter data.
 
-==== Mouse Input
+=== Mouse Input
 
-===== Scrolling
+==== Scrolling
 
 List should have scroller. 
 
-====== Scrolling steppes 
+==== Scrolling steppes 
 
 The are defined during setup in the `options` block with `'follow-size`
 
 Scrolling it can be done by one row or a page, also the current line could be always on center
 
-===== Scroll weel support
+==== Scroll weel support
 
 Scroll well jump lines should be configurated
 
-===== Drag and drop support 
+==== Drag and drop support 
 
 Lines should be selectable and draggable to an upper/lower position
 
-===== Other mouse buttons support
+==== Other mouse buttons support
 
 (To be written)
 
-==== Keyboard Input and avigation 
+=== Keyboard Input and avigation 
 
 Keyboard navigation and editing should be possible and configurable
 
 Here are some setups coming from _R3 Text-Table_ and _Vid Extension Kit_
 
-====== Keyboard usage 1
+==== Keyboard usage 1
 
 ...
 
@@ -578,7 +578,7 @@ It's possible to use keyboard for TEXT-TABLE navigation and access. Here's list 
 
 ...
 
-===== Keyboard usage 2
+=== Keyboard usage 2
 
 ...
 
@@ -606,58 +606,53 @@ Hitting TAB the corsor will jump a number of columns depending on cell
 
 Hitting ENTER the cursor will jump a number of columns depending on cell
 
-=== Touch Input
-
-TO-BE-WRITTEN
-
-
-==== flat GUI/touch support
+=== flat GUI/touch support
 
 A flat mode should be planned for touch interfaces. It will have bigger elements and different input modes. Transitions from computer to tablet mode should be implemented
 
-==== List State Saving/Loading
+=== List State Saving/Loading
 
 The state of the list could be queried, saved, and set
 
-==== Reset function 
+=== Reset function 
 
 TO-BE-WRITTEN
 
-==== Data save function
+=== Data save function
 
 TO-BE-WRITTEN
 
-==== List inside list
+=== List inside list
 
 TO-BE-WRITTEN
 
-==== Customizable heading layout
+=== Customizable heading layout
 
 TO-BE-WRITTEN
 
-=== Standar List-View elements
+== Standar List-View elements
 
 TO-BE-WRITTEN
 
-==== Button to reset list to the default sorting
+=== Button to reset list to the default sorting
 
 TO-BE-WRITTEN
 
-==== Button to reset the list to the default size
+=== Button to reset the list to the default size
 
 TO-BE-WRITTEN
 
-==== List state and filters save function
+=== List state and filters save function
 
 TO-BE-WRITTEN
 
-==== Multi SKIN/ASPECT 
+=== Multi SKIN/ASPECT 
 
 The List-View should support multiple skinning and working setups
 
 
 
-==== Extended config block for custom handler
+=== Extended config block for custom handler
 
 
 == Accessors (From R3 Text Table)
@@ -889,6 +884,9 @@ Example: all values starting with "A":
 	]
 ```
 
+=== List of Vid Extension Kit Actor (All, including those LIST-VIEW specific)
+
+https://github.com/GiuseppeChillemi/VID-Extension-Kit/wiki/USR---Actors
 
 References:
 

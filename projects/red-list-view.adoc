@@ -1,0 +1,897 @@
+= List-View Requested Features 
+Doc Writer <chillemi@nomail.it>
+v0.9, 23/08/2020
+:toc:
+
+Project is now near to be complete
+
+== Introduction
+
+Displaying data organized as a list of rows and columns is a common way of consulting information and make a selection for the human being. Computers are a very powerful instrument for working on these lists which could be displayed, edited, stored and retrieved, and used as a starting point for further operations. 
+
+A List-View is a needed component. The various programmers have started creating list managing components but they all are a prototypes.
+
+RED is the successor of REBOL and any developer needs to manage data grouped as rows and columns, so the request for the development of a LIST VIEW component, powerful enough for modern needings.
+
+In the Rebol World, the most used lists are Vid Extension Kit, List-View VID Widget and R3 Text-Table. The first 2 have been created by Henrik Mikael Christensen @henrickmk and the last one by Boleslav Březovský (@rebolek). Note that R3 Text Table shares many of the designs and design influencers of the first two. This led to a common de-facto standard and shared functioning between projects and in the whole community.
+This Document is based on Vid Extension Kit and R3 Text Table specification.
+
+== The Users Side
+
+From the END-USER side, there are some basic List-View interactions that are universal among all computer systems. The user expects them to be there and they are all the basic core a List-View Widget:
+
+==== List of expected functions
+ 
+* One or multiple selectable rows/columns
+* Speed to display millions of rows
+* Multi-selection via qualifier or just via progressive LMB clicks
+* List reactions Double click, right-click, qualifier + Mouse Button Click
+* Double click and key combinations at cells level
+* Keyboard navigation
+* Jump scroll navigation (paged)
+* IN-CELL Editing
+* Editing cursor
+* Data Validation
+* Conditional Cell Aspect/Color
+* RTF-Text
+* Tabs and TAB Jumps
+* Column Resizing
+* Column Sorting
+* Column Hiding/restoring
+* Column Names on Top
+* Column Filtering
+* Column in different colors
+* Data positioning (Left/Right/Center)
+* Borders/No-borders
+* Rows Cut&PAste
+* Rows Insert and Delete
+* Row Expansion with sublist rendering
+* Row could be dragged to another position maintaining it
+* Position Keeping on Delete, resize operations, add/remove/insert
+* Aspect keeping on closing and reopening the windows
+* Aspect reset
+* Child list editing when the list is a sub list
+* Font Size Modification
+* Read Only Cells
+* Alternate row colors for readability
+* Conditional row and cell colors
+* Drag&Drop
+* Image Diplaying
+* Custom Cells
+
+
+== The Developers SIDE
+
+The developer has to do everything above at the code level. 
+
+=== Input Data Types
+
+Data has one or all of the following sources:
+
+* flat (1 dimension blocks)
+* block of blocks (2 dimensions, where each block is a ROW, headings on first)
+* Block of Objects (1 Object = 1 Row, headings at field level
+* Maps
+* Other Datatypes in the form column/rows as those at https://github.com/red/red/wiki/CSV-codec
+* Databases
+
+=== Geometry of the input type:
+
+In my experience, I have found the different list-view widgets support only geometrically identical rows (number of elements), while others accept variable geometry rows.
+
+Some works with in-data headings, some others with separately provided or without headings at all.
+
+=== Direct or Indirect data
+
+Two models have been historically adopeted to store data in the widget: direct NATIVE form, or indirect.
+
+==== Direct form
+
+In the direct form, the widget works on the original data, and the developer can modify it and later ask for updates via `SHOW` command.
+
+==== Indirect form
+
+Indirect for is where the internal data container of the widget is different than the source one and an accessor interface is provided. That's especially true with database servers which returns large data sets and only part of it is maintained in the widget. 
+
+Personally I have worked with the first kind of implementation but I see from multiple sides the request for a decoupling mechanism and interfaces. R3 Text List also works that way and under the light of the previous points this makes fully sense. In R3 Text Table row and cells are modified via `set-face` based accessors like `set-face/field` or `get-face/field`. In Vid Extension Kit rows are modified using the `edit-face` and also get-face/set-face. 
+
+Other accessors like `face/selected` contain a block with the indexes of the selected data or `face/filtered` for a fiter based subset. 
+
+=== Red Reactivity
+
+The reactivity model of Red can overcome such complex interfaces lowering the number if many accessors to data and parameters. Modifications on original or displayed data should reflect on the other side. 
+
+=== Rows and Headings o the List-View
+
+A coordinate system is needed to indicate the proper row/column. If headings are know the list-view should be able to access row/columns via path like `row-index/column-name|number` or coordinates `XxY`.
+
+=== Filtering data
+
+One of the basic user and developer needing is to display data in the filtered form. A face/filtered selector should return the filtered rows and while somewhere else the relative selected indexes should be available. 
+
+=== Cell Data type
+
+* Some widget converts to `text` MOLDING the cell content, while others manage the original datatype natively. R3 Text-List has internal datatypes ( I suppose to overcome the shortcomings of Rebol3) 
+
+Full support of Red Native Datatypes is required with, optionally, custom cell types. 
+
+=== Same Data different list-view types:
+
+It's not "one fits all" to different needing should correspond to different base settings and aspects. Vid Extension kit has a set of compound styles presets and this should be possible for Red List-View changing the style name but having the same internal functioning. 
+
+This is a list of different compound styles in VEK.
+
+* NAV-LIST, DATA-LIST, PARAMETER-LIST , TEXT-LIST, DATA-LIST, CHOICE
+
+They are built with the same Basic List-View Building components:
+
+* LIST, CARET-LIST, SCROLLER, LIST-CELL, LIST-TEXT-CELL, LIST-IMAGE-CELL, SORT-BUTTON, SORT-RESET-BUTTON 
+
+
+A similar flexibility is needed for Red List-View
+
+(reference doc: https://github.com/GiuseppeChillemi/VID-Extension-Kit/wiki/USR---List)
+
+=== Custom Cell Type
+
+To extend Red List-View Widget and accommodate all possible future needings it should accept custom-developed cells
+
+== VID Dialect
+
+To configure the LIST-VIEW a VID Dialect is needed to express all the required properties.
+
+`list-view data data-list input [] output [] options [] extra []`
+
+===== The basic configuration and the DATA block
+
+To setup the widget the amount of configuration should be minimal with all implicit configuration set to a default working:
+
+`list-view data`
+
+Should be enough to display a block with 1 or more column elements where there is no geometry ambiguity. Column names, if not present in the data format, or provided, should be auto-generated (a/b/c); numbered column access should always be possible. If there is a columns mismatch then an error will be thrown.
+
+When such a simple view is not sufficient, additional elements of the dialect will come in help.
+
+===== The Input Block
+
+This block contains the specification of the input data
+
+`list-view input row-proto`
+
+Will create an empty list will auto calculated size and column names corresponding to `words-of row-proto` (context is not relevant here)
+
+This:
+
+`row-proto: make object! [a: b: c: none]`
+
+should create the same columns of:
+
+`row-proto: [a b c]`
+
+in 
+
+`list-view input row-proto`
+
+The remaining part of the dialect will control all the other aspects of the list-view
+
+===== The output Block
+
+This block will control all the column related functions, like the visibility and position, header names and so on.
+
+the `output` block format is:
+
+`output [column-name "Column Displayed" #position column-width data-type ...]`
+
+* If absent all columns will be displayed
+* If present all the mentioned columns whose name is in the `input` or embedded in the data format, will be displayed getting the following setting. #Position will the column order of appearance (position to display the column)
+* If `column-name` is absent, #position will become corresponding #position column that will receive the setting (Position to receive the setting)  
+
+*Other cell-specific cell information must be analyzed and its format established*
+
+
+====== The OPTIONS block
+
+It regulates all the aspects of the list which are not cell specific
+
+`options [mode mutex scroll-steps 'page]`
+
+In the example: Selection mode will be set to MUTEX and scroll steps to PAGE.
+
+====== Extras
+
+Will contain extra list-view configuration data when they do not fit to other elements.
+
+
+
+==== Accessing data
+
+As expressed, the developer should be able to use coordinates by `row-number/column-name|index` or via Vector `AxB`. One dimensional coordinate refers to a row.
+
+Selected index will be returned as block in `face/selected` *facet* *accessor*. RED `text-list` datatype returns only `none|integer`on `face/selected` as there is no multiselection. I propose `none|[indexes]` to support multi-selection but `none|index|[indexes]` is welcome too if we could choose one or another working at SETUP.
+
+==== Resetting the list
+
+A function like
+
+`reset-face my-data`
+
+Or any other that suits to the adopted model, will create a list-view with setup configuration in basic clean state.
+
+== Complete features list:
+
+The following is the complete features list of the `list-view`. The corresponding VID dialect keywords and arguments are not there but few. During the development, they will be defined.
+
+==== defaults
+
+During editing cell defaults could be provided
+
+==== Database data storing and retrieving
+
+A paged data interface reading/writing/quering should be planned.,
+To the server will delegated some time consuming operations (IE: querying the table)
+
+A connection format should be established
+
+==== RTF-Text
+
+Rich text format must be accepted so the table could have significant colors and font based on data content (example: `row/field > 10.000` should be green, `row/loss > 20` should be bold red. 
+
+==== Auto size
+
+Depending on columns size and data content the gui will auto setup.
+If columns are positionend beyond the rightmost edge a scroll bar will be added.
+
+==== Auto Redraw on GUI resize.
+
+If requested from the user the initial size will adapt to the new GUI size.
+
+==== Columns
+
+===== Column names 
+
+All output columns should be accessible by their positional numbers in any situation.
+
+When no `input` element is provided column name will be automatic from `A` character upward.
+
+Original field/column names used in the `input` element will be used if no `output` block is provided.
+
+```
+data: [[1 2 3][5 6 7]]
+list-view data x input [a b c]
+```
+
+Will produce
+```
+-----
+a b c
+-----
+1 2 3
+4 5 6
+```
+If an output block is provided and a "string" is provided it will be the corresponding column name
+
+```
+data: [[1 2 3][5 6 7]]
+list-view data x input [a b c] output ["one" "two" "three"
+```
+
+Will produce
+
+```
+-------------
+one two three
+-------------
+1    2    3
+4    5    6
+```
+
+Also it will be produced by:
+
+```
+data: [[1 2 3][5 6 7]]
+list-view data x input [a b c] output [a "one" b "two" c "three"]
+```
+
+And
+
+```
+data: [[1 2 3][5 6 7]]
+list-view data x input [a b c] output [a "one" #1 "two" b #2 "three" c #3]
+```
+
+===== Column size 
+
+Size of each column could be fixed or user-editable. Their value in the `output` block or calculated if omitted.
+
+`[a "one" #1 100 "two" b #2 150 "three" c #3 100]`
+
+Without column names and positions sizes will be set to the corresponding ordinal.
+
+`[100 150 100]`
+
+If a position is expressed the corresponding column will get the size
+
+`[#2 100 #1 #3 100]`
+
+
+===== Column size adaption
+ 
+Double click on column separator on heading to adapt to its content (but with limit on max size)
+
+===== Columns separator
+
+If a
+
+`  "|" Pixel space`
+
+Is present between output column names vertical borderline will be inserted between columns
+
+===== Column sorting
+
+* Columns could be sorted and unsorted.
+
+* Sort column(s) and direction depend on OPTIONS configuration.
+
+* Sorting depends on column datatype
+
+* Separate sort function should be planned
+
+* Developers should be able to change the sorting on the run and also get the sorting settings.
+
+* default-sort-direction
+
+Sort direction of the choosen column
+
+* default-sort-column
+The column to sort at startup
+
+===== Columns/Cell Datatype
+
+The cell datatype is established from the input data.
+
+If a datatype for the column is expressed in some other way it will be the default one.
+
+It is unclear a target datatype should be adopted with autoconversion at input.
+
+* Having different data sources than red blocks
+
+===== Column moving/hiding/unhide
+
+User and developers should be able to move columns, hide, and restore them.
+
+===== Highlighted sort column 
+
+The sorting column(s) should be highlighted
+
+===== calculated VIRTUAL columns
+
+Not all columns should come from the original data. Calculated virtual columns/data should be implemented.
+
+Cells with calculated columns or graphic
+
+==== Cell Section
+
+===== Cell apparence
+
+Developers should be able to pass a function which changes the appearance of the cell (font/font color/background color/style) depending on its data content
+
+Different cell drawing (frames,content)
+
+===== Cell Justification
+
+`justification LEFT|CENTER|RIGHT`
+
+===== Cell Editors
+
+Custom cell editor should be expressed in a datatype basis or datatype/column
+
+===== CELL datatype (Basic, other at the discretion of the developer)
+
+It will support:
+- Text
+- Unicode Text
+- Numbers (integers, float)
+- Dates
+- Pictures
+- BUTTON and other interactive VID elements
+- URL datatype
+
+
+
+===== Cell with buttons/multi-list
+
+Each cell could have buttons, buttons + data, active corners, multi-list choice.
+
+Button with GIF and 2 states
+
+Column with button on its side
+
+===== Custom Cells
+
+TO BE WRITTEN
+
+====  List Geometry and columns
+
+The number and name of columns is established as follow:
+
+If the datatype content has no explicit column names they must be provided using a separate `input` block. If the block has not ROW limits (a flat element) the ROW length correspond to the number of words in the `input` element.  Otherwise, it will be retrieved from the data. If column length mismatches from the input element an error should be thrown, otherwise columns with default type should be created.
+
+==== Selecting elements
+
+===== Selection Modes
+
+The selection modes available will be expressed in the options block al follow
+
+`select-mode mode`
+
+This is either:
+
+* MUTEX, which allows only selecting one row
+* PERSISTENT, which allows selecting multiple rows without using a qualifier key or 
+* MULTI (default), which allows selecting multiple rows using CTRL or SHIFT as qualifier keys. 
+
+
+
+===== Current position/selection
+
+The developer should be able to select one or more rows/columns via
+
+select-face 
+  `
+  'Next
+  'Prev
+  'first
+  'last
+  'true
+  'false
+  [block of line-numbers]
+  search function
+  `
+
+A corresponding `select-column` should be implemented (if proper `select-face` dialect can't be found)
+
+
+
+==== Data managing, Data Editing
+
+'ADD 'DELETE 'SET
+
+===== Editing
+
+* Cell must be editable either in place or vie editors
+
+Some cell/column should be editable, some other not
+
+* Editing via key combination
+
+* Single cell highlight!
+
+===== Rows inserting/deletion/moving
+
+Basic row deletion/adding/moving up and down should be provided.
+
+The action could happen via accessors or operating on the original data
+
+===== Custom elements/sublists/custom rendering
+
+The following chapter comes from Vid Extension Kit 
+
+Each list could open a sublist
+
+* header-face
+
+This is a layout block. When used, it will replace the standard header generated by LIST-VIEW. 
+
+* sub-face
+
+This is a layout block for each row used in the layout. When using this, you can create an entirely custom layout, even with multiple lines per data row. Words in OUTPUT are distributed in the same order that the faces are described in the layout. 
+
+* render
+
+This is a function body that uses FACE and CELL as argument. The FACE is the list face inside the data list. The CELL is the cell that is currently being rendered.
+
+===== Getting Data
+
+* Array with selected rows
+
+* Getting all selected rows
+
+Get what is selected 
+
+ 
+
+==== Basic Add/Remove/Delete (Even multi) with position maintaining 
+
+To be written
+
+==== Position keeping on developer actions like insert-delete
+
+To be written
+
+==== Storing position
+
+It should be possible to store/retrieve The internal data like cursor position/columns displayed/size. It is needed for gui transitions.
+
+==== Input data validation
+
+The data being input by the user should be validate with developer provided validator function.
+
+Validation function should be set at column level and/or datatype level
+ 
+It must be established where such valuation function will be expressed but `output` block is a good candidate, also a separate `validators` block.
+
+Validation for the whole row should be possibile
+
+==== Filtering
+
+Data could be displayed as it is or filtered using a function
+
+The user should be able to enter filters in a row of fields at the top or the bottom of the list, or elsewhere.
+
+The developer will use a function to filter data.
+
+==== Mouse Input
+
+===== Scrolling
+
+List should have scroller. 
+
+====== Scrolling steppes 
+
+The are defined during setup in the `options` block with `'follow-size`
+
+Scrolling it can be done by one row or a page, also the current line could be always on center
+
+===== Scroll weel support
+
+Scroll well jump lines should be configurated
+
+===== Drag and drop support 
+
+Lines should be selectable and draggable to an upper/lower position
+
+===== Other mouse buttons support
+
+(To be written)
+
+==== Keyboard Input and avigation 
+
+Keyboard navigation and editing should be possible and configurable
+
+Here are some setups coming from _R3 Text-Table_ and _Vid Extension Kit_
+
+====== Keyboard usage 1
+
+...
+
+It's possible to use keyboard for TEXT-TABLE navigation and access. Here's list of supported keys:
+
+- *UP&DOWN* - navigation around table
+
+- *SHIFT+UP&DOWN* - move rows up and dows
+
+- *E* - edit cell
+
+- *CTRL+CURSOR KEYS* - (only when cell editor is open) - move around table
+
+- *SHIFT+E* - open quick form editor.
+
+...
+
+===== Keyboard usage 2
+
+...
+
+- The Vid Extension Kit LIST style offers a KEY-FACE accessor function with the following functionality:
+
+- *UP*	Selects the previous row. If no items are selected, the first row is selected. If the previous row is out of view, the list scrolls it into view. The use of the FOLLOW-SIZE keyword during setup sets whether to jump by one line or a whole page, when the list scrolls the selected row into view.
+- *DOWN* Selects the next row. If no items are selected, the first row is selected. If the next row is out of view, the list scrolls it into view.
+- *CTRL-UP* Selects a row one page up and deselects the previously selected row. One page is the number of visible rows in the list.
+- *CTRL-DOWN* Selects a row one page down and deselects the previously selected row.
+- *SHIFT-UP* Selects the previous row and does not deselect any previous rows.
+- *SHIFT-DOWN* Selects the next row and does not deselect any previous rows.
+- *CTRL-SHIFT-UP* Selects the entire previous page and does not deselect any previous rows.
+- *CTRL-SHIFT-DOWN* Selects the entire next page and does not deselect any previous rows.
+- *CTRL-A* Selects all rows.
+- *CTRL-SHIFT-A* Deselects all rows.
+
+...
+
+==== Tab Jump
+
+Hitting TAB the corsor will jump a number of columns depending on cell
+
+
+==== Enter Jump
+
+Hitting ENTER the cursor will jump a number of columns depending on cell
+
+=== Touch Input
+
+TO-BE-WRITTEN
+
+
+==== flat GUI/touch support
+
+A flat mode should be planned for touch interfaces. It will have bigger elements and different input modes. Transitions from computer to tablet mode should be implemented
+
+==== List State Saving/Loading
+
+The state of the list could be queried, saved, and set
+
+==== Reset function 
+
+TO-BE-WRITTEN
+
+==== Data save function
+
+TO-BE-WRITTEN
+
+==== List inside list
+
+TO-BE-WRITTEN
+
+==== Customizable heading layout
+
+TO-BE-WRITTEN
+
+=== Standar List-View elements
+
+TO-BE-WRITTEN
+
+==== Button to reset list to the default sorting
+
+TO-BE-WRITTEN
+
+==== Button to reset the list to the default size
+
+TO-BE-WRITTEN
+
+==== List state and filters save function
+
+TO-BE-WRITTEN
+
+==== Multi SKIN/ASPECT 
+
+The List-View should support multiple skinning and working setups
+
+
+
+==== Extended config block for custom handler
+
+
+== Accessors (From R3 Text Table)
+
+Data and configs should be accessible either directly and or with accessors. 
+
+== Style access
+
+== Get values
+
+=== VALUE
+*integer!*
+Returns index of current value in list-data.
+
+=== DATA
+*block!*
+Returns list-data.
+
+=== FILTERED
+*block!*
+Returns filtered list-data.
+
+=== FILTER
+*block!*
+Returns current filter settings.
+
+=== LABELS
+*block!*
+Returns current settings of labels in list-labels format (see above).
+
+=== ROW
+*block!*
+Returns list-data at current row position.
+
+== Set values
+
+=== VALUE
+*integer*
+Set index (highlight row) of list-data.
+
+=== DATA
+Set data for table.
+
+=== LABELS
+Set column labels.
+
+=== FILTER
+Set filter to use.
+
+(END R3 TEXT TABLE STYLE ACCESS)
+
+== Actors
+
+===== Key and event handling on actor
+
+Events must trigger actors
+
+with *on-drag
+
+== ON-GET / GET-FACE
+
+Large range of actor, database editing actors 
+
+- On-data-load
+- On-refresh
+- On-reset
+- On-revisualize
+
+Basic actor and function for getting table's values. Preffered method is to use GET-FACE function, it's also possible to get values using ON-GET actor.
+
+GET-FACE text-table
+	
+Will return active row number.
+
+
+== ACTORS LIST:
+== Actors for data and gui events
+
+Actors are the API of List-view. 
+
+== Possible actors (From R3 Text-List)
+
+example: on-cell-edited
+
+==== Actors for data and gui events
+
+=== ON-INIT
+
+Basic internal actor used when initializing GUI. Style user doesn't need to access this actor.
+
+=== ON-SET / SET-FACE
+
+Basic actor used for setting table's values. There are several ways to set data, preffered way is to use SET-FACE function which calls the ON-SET actor. It's also possible to use ON-SET actor directly, but this will omit some data checks etc.
+
+basic usage
+
+SET-FACE text-table active-row
+Basic usage that will set active row (NOTE: this may change).
+
+=== fields
+
+Because TEXT-TABLE is complex style with lots of different data, additional ways to input these data are implemented using the /fields refinement. Follows the list of all supported fields.
+
+- *VALUE*
+
+Basic field, works same as if no field is specified.
+
+- *DATA*
+
+Set table's data. Usage:
+SET-FACE/FIELD text-table table-data 'data
+
+- *LABELS*
+
+(NOTE: name of this field will change to better describe fuctionality.)
+Set table's attributes. Usage:
+SET-FACE/FIELD text-table attributes 'labels
+SET-FACE/FIELD text-table attributes 'atts ; proposed change of field name
+For the dialect description, see above the LIST-OPTIONS.
+
+- *STATE*
+
+Set table's state. State is object holding current table state (active filters, sorting, active row...). This state can be stored on disk for later use.
+
+=== ON-GET / GET-FACE
+
+Basic actor and function for getting table's values. Preffered method is to use GET-FACE function, it's also possible to get values using ON-GET actor.
+GET-FACE text-table
+Will return active row number.
+Basic actor 
+
+=== ON-DRAW
+
+Basic internal actor that handles drawing of table data. ON-DRAW calls ON-DRAW-GRID which draws table's header and grid. After that, ON-DRAW-ROW is called for each visible row that calls ON-DRAW-CELL to draw each cell. All actors add draw code to the LAYOUT-BLOCK facet.
+
+=== ON-RESIZE
+
+Basic actor handling resizing code.
+
+=== ON-FOCUS
+
+Basic actor handling focusing code.
+
+=== ON-KEY
+
+Basic actor handling keyboard bindings. See below for list of supported keys.
+
+=== ON-REMOVE-ROW
+
+ARG: row index to remove.
+Remove row from table data.
+
+=== ON-OPEN-EDITOR
+
+INTERNAL actor. Will open data editor of selected type. Uses ON-PLACE-EDITOR internal actor to determine editor placement.
+
+=== ON-FIND-CELL
+
+ARG: Y position in pixels.
+Return index of row under mouse cursor.
+
+=== ON-FIND-COL
+
+ARG: X position in pixels
+Return index of column under mouse cursor.
+
+=== ON-SORT
+
+ARG: column index [integer!], direction [UP DOWN anything-else]
+Will sort table data. ON-SORT creates sorted index, original data are not changed.User can select by which column to sort and the direction of sort. Sort support |UP and DOWN directions, anything else (NONE is prefered but not required) will change the sorting index back to unsorted data.
+
+=== ON-GET-COL
+
+ARG: visible index
+Return index in data (Columns can be rearanged and ie. third visible column can be second in source data. This function will change visible index to real one).
+
+=== ON-FILTER-DATA
+
+ARG: NONE (turn off filtering) or [column-index [integer!] filter [block!]]
+TODO: support multi-filters (filter with more than one column).
+Will filter data according to a filter. Binds VALUE for filter which is cell's value that can be tested against filter.
+Example: all values starting with "A":
+all [
+not none? value
+value/1 = #"a"
+]
+
+=== ON-GET-VIEW and ON-GET-FLAT-VIEW
+
+ARG: block of indexes
+Return filtered view of table. NOTE: ON-GET-FLAT-VIEW actor will be removed soon.
+
+=== ON-SCROLL-LINE
+
+ARG: number of lines to scroll [integer!] - positive: scroll down, negative: scroll up
+Scroll table view by required number of lines.
+
+=== ON-GET-RECORD
+
+ARG: record id [integer!]
+Return value from table.
+
+=== ON-SET-VALUE
+
+ARG: value
+Will set value. NOTE: Value differs in TEXT-TABLE and TEXT-LIST, this actor hadles the differencies.
+
+=== ON-INIT-TABLE
+
+Used by DB handler to clear table all indexes.
+=== ON-ENTER and ON-EDIT-ACTION
+Actor is called when value is set in editor.
+	*
+
+=== ON-FILTER-DATA
+
+ARG: NONE (turn off filtering) or [column-index [integer!] filter [block!]]
+
+TODO: support multi-filters (filter with more than one column).
+
+Will filter data according to a filter. Binds VALUE for filter which is cell's value that can be tested against filter.
+
+Example: all values starting with "A":
+
+```
+	all [
+		not none? value
+		value/1 = #"a"
+	]
+```
+
+
+References:
+
+http://rebol.informe.com/wiki/view/Text-table
+https://github.com/GiuseppeChillemi/VID-Extension-Kit/wiki/USR---List
+http://www.hmkdesign.dk/rebol/list-view/docs/list-view.html

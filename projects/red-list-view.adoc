@@ -3,9 +3,6 @@ Doc Writer <chillemi@nomail.it>
 v0.95, 24/08/2020
 :toc:
 
-Project is now near to be complete
-
-
 
 == Introduction
 

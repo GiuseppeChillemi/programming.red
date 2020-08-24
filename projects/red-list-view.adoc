@@ -11,16 +11,14 @@ Project is now near to be complete
 
 Displaying data organized as a list of rows and columns is a common way of consulting information and make a selection for the human being. Computers are a very powerful instrument for working on these lists which could be displayed, edited, stored and retrieved, and used as a starting point for further operations. 
 
-A List-View is a needed component. The various programmers have started creating list managing components but they all are a prototypes.
-
-RED is the successor of REBOL and any developer needs to manage data grouped as rows and columns, so the request for the development of a LIST VIEW component, powerful enough for modern needings.
+RED is the successor of REBOL and any developer needs to manage data grouped as rows and columns, so the request for the development of a LIST VIEW component, powerful enough for modern needings. Different programmers have started creating list managing components but they all are a prototypes.
 
 In the Rebol World, the most used lists are Vid Extension Kit, List-View VID Widget and R3 Text-Table. The first 2 have been created by Henrik Mikael Christensen @henrickmk and the last one by Boleslav Březovský (@rebolek). Note that R3 Text Table shares many of the designs and design influencers of the first two. This led to a common de-facto standard and shared functioning between projects and in the whole community.
 This Document is based on Vid Extension Kit and R3 Text Table specification.
 
 == The Users Side
 
-From the END-USER side, there are some basic List-View interactions that are universal among all computer systems. The user expects them to be there and they are all the basic core a List-View Widget:
+From the END-USER side, there are some basic List-View interactions that are universal among all computer systems. The user expects them to be there and they should all be included in a List-View Widget:
 
 ==== List of expected functions
 
@@ -37,6 +35,7 @@ From the END-USER side, there are some basic List-View interactions that are uni
 * Conditional Cell Aspect/Color
 * RTF-Text
 * Tabs and TAB Jumps
+* Presence of cliccable buttons/selectable lists at cell level
 * Column Resizing
 * Column Sorting
 * Column Hiding/restoring
@@ -47,10 +46,10 @@ From the END-USER side, there are some basic List-View interactions that are uni
 * Borders/No-borders
 * Rows Cut&PAste
 * Rows Insert and Delete
-* Row Expansion with sublist rendering
-* Row could be dragged to another position maintaining it
+* Row Expansion with sublist
+* Row dragged to different positions (and keeping it)
 * Position Keeping on Delete, resize operations, add/remove/insert
-* Aspect keeping on closing and reopening the windows
+* Aspect keeping on closing and reopening 
 * Aspect reset
 * Child list editing when the list is a sub list
 * Font Size Modification
@@ -79,9 +78,7 @@ Data has one or all of the following sources:
 
 === Geometry of the input type:
 
-In my experience, I have found the different list-view widgets support only geometrically identical rows (number of elements), while others accept variable geometry rows.
-
-Some works with in-data headings, some others with separately provided or without headings at all.
+In my experience, I have found the different list-view widgets support only geometrically identical rows (number of elements), while others accept variable geometry rows. Dixed cells should be the way to go.
 
 === Direct or Indirect data
 
@@ -105,17 +102,17 @@ The reactivity model of Red can overcome such complex interfaces lowering the nu
 
 === Rows and Headings o the List-View
 
-A coordinate system is needed to indicate the proper row/column. If headings are know the list-view should be able to access row/columns via path like `row-index/column-name|number` or coordinates `XxY`.
+Some Red datatypes have inlicit headings/field-names, some others have no headings and should be separately provided.
+
+A coordinate system is needed to indicate the proper row/column. The developer should be able to access row/columns via path like `row-index/column-name|number` or coordinates `XxY`.
 
 === Filtering data
 
-One of the basic user and developer needing is to display data in the filtered form. A face/filtered selector should return the filtered rows and while somewhere else the relative selected indexes should be available. 
+One of the basic user and developer needing is to display data in the filtered form. A face/filtered selector should return the filtered rows.
 
 === Cell Data type
 
-* Some widget converts to `text` MOLDING the cell content, while others manage the original datatype natively. R3 Text-List has internal datatypes ( I suppose to overcome the shortcomings of Rebol3) 
-
-Full support of Red Native Datatypes is required with, optionally, custom cell types. 
+Some widget converts to `text` MOLDING the cell content, while others manage the original datatype natively. R3 Text-List has internal datatypes ( I suppose to overcome the shortcomings of Rebol3). Full support of Red Native Datatypes, with optionally custom cell types, is needed to unleash the full prower of the language,
 
 === Same Data different list-view types:
 
@@ -129,14 +126,13 @@ They are built with the same Basic List-View Building components:
 
 * LIST, CARET-LIST, SCROLLER, LIST-CELL, LIST-TEXT-CELL, LIST-IMAGE-CELL, SORT-BUTTON, SORT-RESET-BUTTON 
 
-
 A similar flexibility is needed for Red List-View
 
 (reference doc: https://github.com/GiuseppeChillemi/VID-Extension-Kit/wiki/USR---List)
 
 === Custom Cell Type
 
-To extend Red List-View Widget and accommodate all possible future needings it should accept custom-developed cells
+To extend Red List-View Widget and accommodate all possible future needings it should accept custom-developed cell styles.
 
 == VID Dialect
 
@@ -156,11 +152,11 @@ When such a simple view is not sufficient, additional elements of the dialect wi
 
 === The Input Block
 
-This block contains the specification of the input data
+This block contains the specification of the input data:
 
 `list-view input row-proto`
 
-Will create an empty list will auto calculated size and column names corresponding to `words-of row-proto` (context is not relevant here)
+It will create an empty list will auto calculated size and column names corresponding to `words-of row-proto` (context is not relevant here)
 
 This:
 
@@ -180,7 +176,7 @@ The remaining part of the dialect will control all the other aspects of the list
 
 This block will control all the column related functions, like the visibility and position, header names and so on.
 
-the `output` block format is:
+the `output` block format should be:
 
 `output [column-name "Column Displayed" #position column-width data-type ...]`
 
@@ -188,7 +184,7 @@ the `output` block format is:
 * If present all the mentioned columns whose name is in the `input` or embedded in the data format, will be displayed getting the following setting. #Position will the column order of appearance (position to display the column)
 * If `column-name` is absent, #position will become corresponding #position column that will receive the setting (Position to receive the setting)  
 
-*Other cell-specific cell information must be analyzed and its format established*
+*Other cell-specific cell information must be analyzed and the dialect elements established*
 
 
 === The OPTIONS block
@@ -202,14 +198,6 @@ In the example: Selection mode will be set to MUTEX and scroll steps to PAGE.
 === Extras
 
 Will contain extra list-view configuration data when they do not fit to other elements.
-
-
-
-=== Accessing data
-
-As expressed, the developer should be able to use coordinates by `row-number/column-name|index` or via Vector `AxB`. One dimensional coordinate refers to a row.
-
-Selected index will be returned as block in `face/selected` *facet* *accessor*. RED `text-list` datatype returns only `none|integer`on `face/selected` as there is no multiselection. I propose `none|[indexes]` to support multi-selection but `none|index|[indexes]` is welcome too if we could choose one or another working at SETUP.
 
 === Resetting the list
 
@@ -241,11 +229,11 @@ Rich text format must be accepted so the table could have significant colors and
 === Auto size
 
 Depending on columns size and data content the gui will auto setup.
-If columns are positionend beyond the rightmost edge a scroll bar will be added.
+If columns are positionend beyond the rightmost edge a scroll bar hsould be added.
 
 === Auto Redraw on GUI resize.
 
-If requested from the user the initial size will adapt to the new GUI size.
+If a resize is requested from the user the initial size will adapt to the new GUI size.
 
 === Columns
 
@@ -324,9 +312,9 @@ Double click on column separator on heading to adapt to its content (but with li
 
 If a
 
-`  "|" Pixel space`
+`"|" Pixel space`
 
-Is present between output column names vertical borderline will be inserted between columns
+Is present between output column names vertical 1 pixel line should be inserted between columns
 
 ==== Column sorting
 
@@ -340,22 +328,17 @@ Is present between output column names vertical borderline will be inserted betw
 
 * Developers should be able to change the sorting on the run and also get the sorting settings.
 
-* default-sort-direction
+* The default sort direction must be configurable
 
-Sort direction of the choosen column
-
-* default-sort-column
-The column to sort at startup
-
+* The default sort column must be selectable
+ 
 ==== Columns/Cell Datatype
 
 The cell datatype is established from the input data.
 
-If a datatype for the column is expressed in some other way it will be the default one.
+If a datatype for the column is expressed in some other way it will superseed the default one.
 
 It is unclear a target datatype should be adopted with autoconversion at input.
-
-* Having different data sources than red blocks
 
 ==== Column moving/hiding/unhide
 
@@ -367,9 +350,7 @@ The sorting column(s) should be highlighted
 
 ==== calculated VIRTUAL columns
 
-Not all columns should come from the original data. Calculated virtual columns/data should be implemented.
-
-Cells with calculated columns or graphic
+Not all columns should come from the original data. Calculated virtual columns/data should be implemented. Their cells will have calculated content or graphic.
 
 === Cell Section
 
@@ -398,21 +379,23 @@ It will support:
 - BUTTON and other interactive VID elements
 - URL datatype
 
-
-
 ==== Cell with buttons/multi-list
 
 Each cell could have buttons, buttons + data, active corners, multi-list choice.
 
-Button with GIF and 2 states
-
 Column with button on its side
+
+==== Read Only Cells 
+
+* Cell must be editable either in place or vie editors
+
+Some cell/column should be editable, some other not
 
 ==== Custom Cells
 
-TO BE WRITTEN
+The implementation of the list-view componet must permit the use of custom cell styles provided by the developer
 
-===  List Geometry and columns
+===  List Geometry and column names
 
 The number and name of columns is established as follow:
 
@@ -432,12 +415,12 @@ This is either:
 * PERSISTENT, which allows selecting multiple rows without using a qualifier key or 
 * MULTI (default), which allows selecting multiple rows using CTRL or SHIFT as qualifier keys. 
 
-==== Current position/selection
+==== Current position/selection via accessor function
 
 The developer should be able to select one or more rows/columns via
 
+```
 select-face 
-  `
   'Next
   'Prev
   'first
@@ -446,25 +429,27 @@ select-face
   'false
   [block of line-numbers]
   search function
-  `
+```
 
-A corresponding `select-column` should be implemented (if proper `select-face` dialect can't be found)
+A corresponding `select-column` accessor should be implemented (if proper `select-face` dialect can't be found)
 
+=== Editing
 
+=== Accessing data
 
-=== Data managing, Data Editing
+As expressed, the developer should be able to use coordinates by `row-number/column-name|index` or via Vector `AxB`. One dimensional coordinate refers to a row.
 
-'ADD 'DELETE 'SET
+Selected index will be returned as block in `face/selected` *facet* *accessor*. RED `text-list` datatype returns only `none|integer`on `face/selected` as there is no multiselection. I propose `none|[indexes]` to support multi-selection but `none|index|[indexes]` is welcome too if we could choose one or another working at SETUP.
 
-==== Editing
+=== Data Editing
 
-* Cell must be editable either in place or vie editors
+The proper interface to add/edit/delete/remove should be evaluated. 
 
-Some cell/column should be editable, some other not
+It is important to have 2 way to interact with data: 
 
-* Editing via key combination
+* direct modifications of source data with Reactivity system mirroring them on the list-view;
 
-* Single cell highlight!
+* Accessors at list-view level and Red Reactivity engine mirroring the modifications on the original block.
 
 ==== Rows inserting/deletion/moving
 
@@ -474,7 +459,7 @@ The action could happen via accessors or operating on the original data
 
 ==== Custom elements/sublists/custom rendering
 
-The following chapter comes from Vid Extension Kit 
+_The following chapter comes from Vid Extension Kit_ 
 
 Each list could open a sublist
 
@@ -490,23 +475,19 @@ This is a layout block for each row used in the layout. When using this, you can
 
 This is a function body that uses FACE and CELL as argument. The FACE is the list face inside the data list. The CELL is the cell that is currently being rendered.
 
-==== Getting Data
-
-* Array with selected rows
-
-* Getting all selected rows
-
-Get what is selected 
-
+Note from Giuseppe Chillemi: 
  
+* footer-face is suggested too. 
 
-=== Basic Add/Remove/Delete (Even multi) with position maintaining 
+* Also, below the footer or above the header, a FILTERING component is highly required.
 
-To be written
+=== Basic Add/Remove/Delete (Even multi) 
+
+When adding rows, columns, the default data should be provided in the specification dialect.
 
 === Position keeping on developer actions like insert-delete
 
-To be written
+It is required to maintain the current list position in editing operation to avoid manual hte need of repositioning from the user.
 
 === Storing position
 
@@ -528,13 +509,17 @@ Data could be displayed as it is or filtered using a function
 
 The user should be able to enter filters in a row of fields at the top or the bottom of the list, or elsewhere.
 
-The developer will use a function to filter data.
+The developer will use a function to filter data. 
+
+_ A filtered data block will be returned _
+
+Vid Extension Kit accesses the rows in this block via `NEXT/PREV/LAST/FIRST...` 
 
 === Mouse Input
 
 ==== Scrolling
 
-List should have scroller. 
+List should have proportional scroller with minumum size.
 
 ==== Scrolling steppes 
 
@@ -550,9 +535,8 @@ Scroll well jump lines should be configurated
 
 Lines should be selectable and draggable to an upper/lower position
 
-==== Other mouse buttons support
+*This relative position should be kept until sorting/resorting*
 
-(To be written)
 
 === Keyboard Input and avigation 
 
@@ -616,130 +600,114 @@ The state of the list could be queried, saved, and set
 
 === Reset function 
 
-TO-BE-WRITTEN
+A reset function should be implemented
 
-=== Data save function
+=== Data save/load function
 
-TO-BE-WRITTEN
+It should be possible to get and set the whole data block when the list-view is already created and displayed.
 
 === List inside list
 
-TO-BE-WRITTEN
+Sublists or sub-rendered elements should be possible
 
-=== Customizable heading layout
 
-TO-BE-WRITTEN
+=== Standar List-View elements
 
-== Standar List-View elements
+The list-view should be modular and built from multiple faces
 
-TO-BE-WRITTEN
+* Customizable header/footers
 
-=== Button to reset list to the default sorting
+* Standard and custom cell 
 
-TO-BE-WRITTEN
+* Button to reset list to the default sorting
 
-=== Button to reset the list to the default size
+* Button to reset the list to the default aspect
 
-TO-BE-WRITTEN
+* Scroller
 
-=== List state and filters save function
-
-TO-BE-WRITTEN
+* Filtering field component
 
 === Multi SKIN/ASPECT 
 
 The List-View should support multiple skinning and working setups
 
 
-
-=== Extended config block for custom handler
-
+== REFERENCE: what others have done!
 
 == Accessors (From R3 Text Table)
 
-Data and configs should be accessible either directly and or with accessors. 
-
-== Style access
+Data and style facets are accessible either directly and or with accessors. 
 
 == Get values
 
-=== VALUE
+==== VALUE
 *integer!*
 Returns index of current value in list-data.
 
-=== DATA
+==== DATA
 *block!*
 Returns list-data.
 
-=== FILTERED
+==== FILTERED
 *block!*
 Returns filtered list-data.
 
-=== FILTER
+==== FILTER
 *block!*
 Returns current filter settings.
 
-=== LABELS
+==== LABELS
 *block!*
 Returns current settings of labels in list-labels format (see above).
 
-=== ROW
+==== ROW
 *block!*
 Returns list-data at current row position.
 
-== Set values
+=== Set values
 
-=== VALUE
+==== VALUE
 *integer*
 Set index (highlight row) of list-data.
 
-=== DATA
+==== DATA
 Set data for table.
 
-=== LABELS
+==== LABELS
 Set column labels.
 
-=== FILTER
+==== FILTER
 Set filter to use.
 
 (END R3 TEXT TABLE STYLE ACCESS)
 
-== Actors
-
-===== Key and event handling on actor
-
-Events must trigger actors
-
-with *on-drag
-
 == ON-GET / GET-FACE
 
-Large range of actor, database editing actors 
-
-- On-data-load
-- On-refresh
-- On-reset
-- On-revisualize
-
-Basic actor and function for getting table's values. Preffered method is to use GET-FACE function, it's also possible to get values using ON-GET actor.
+Basic actor and function for getting table's values. Prefered method is to use GET-FACE function, it's also possible to get values using ON-GET actor.
 
 GET-FACE text-table
 	
 Will return active row number.
 
-
 == ACTORS LIST:
-== Actors for data and gui events
+
+=== Actors for data and gui and key events
 
 Actors are the API of List-view. 
 
-== Possible actors (From R3 Text-List)
+R3 Text table has a Large range of actor, database editing actors 
 
-example: on-cell-edited
+- On-data-load
+- On-refresh
+- On-reset
+- On-revisualize
+...
 
-==== Actors for data and gui events
+on-cell-edited
+on-drag
+....
 
-=== ON-INIT
+==== ON-INIT
 
 Basic internal actor used when initializing GUI. Style user doesn't need to access this actor.
 
@@ -884,12 +852,25 @@ Example: all values starting with "A":
 	]
 ```
 
-=== List of Vid Extension Kit Actor (All, including those LIST-VIEW specific)
+== List of Vid Extension Kit Actor (All, including those LIST-VIEW specific)
 
 https://github.com/GiuseppeChillemi/VID-Extension-Kit/wiki/USR---Actors
 
 References:
 
-http://rebol.informe.com/wiki/view/Text-table
+Wiki and documentation for Vid Extension Kit
 https://github.com/GiuseppeChillemi/VID-Extension-Kit/wiki/USR---List
+
+Source for Vid Extension Kit
 http://www.hmkdesign.dk/rebol/list-view/docs/list-view.html
+
+The Text-Table documentation as from: 
+http://rebol.informe.com/wiki/view/Text-table
+
+Examples of use of R3 Text Table
+http://learnrebol.com/rebol3_book.html#section-7.7
+
+Redis Scheme for R3
+https://github.com/rebolek/prot-redis
+
+

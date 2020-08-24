@@ -707,11 +707,11 @@ R3 Text table has a Large range of actor, database editing actors
 * on-cell-edited
 * on-drag
 
-==== ON-INIT
+===? ON-INIT
 
 Basic internal actor used when initializing GUI. Style user doesn't need to access this actor.
 
-=== ON-SET / SET-FACE
+==== ON-SET / SET-FACE
 
 Basic actor used for setting table's values. There are several ways to set data, preffered way is to use SET-FACE function which calls the ON-SET actor. It's also possible to use ON-SET actor directly, but this will omit some data checks etc.
 
@@ -720,7 +720,7 @@ basic usage
 SET-FACE text-table active-row
 Basic usage that will set active row (NOTE: this may change).
 
-=== fields
+===== fields
 
 Because TEXT-TABLE is complex style with lots of different data, additional ways to input these data are implemented using the /fields refinement. Follows the list of all supported fields.
 
@@ -745,59 +745,59 @@ For the dialect description, see above the LIST-OPTIONS.
 
 Set table's state. State is object holding current table state (active filters, sorting, active row...). This state can be stored on disk for later use.
 
-=== ON-GET / GET-FACE
+==== ON-GET / GET-FACE
 
 Basic actor and function for getting table's values. Preffered method is to use GET-FACE function, it's also possible to get values using ON-GET actor.
 GET-FACE text-table
 Will return active row number.
 Basic actor 
 
-=== ON-DRAW
+==== ON-DRAW
 
 Basic internal actor that handles drawing of table data. ON-DRAW calls ON-DRAW-GRID which draws table's header and grid. After that, ON-DRAW-ROW is called for each visible row that calls ON-DRAW-CELL to draw each cell. All actors add draw code to the LAYOUT-BLOCK facet.
 
-=== ON-RESIZE
+==== ON-RESIZE
 
 Basic actor handling resizing code.
 
-=== ON-FOCUS
+==== ON-FOCUS
 
 Basic actor handling focusing code.
 
-=== ON-KEY
+==== ON-KEY
 
 Basic actor handling keyboard bindings. See below for list of supported keys.
 
-=== ON-REMOVE-ROW
+==== ON-REMOVE-ROW
 
 ARG: row index to remove.
 Remove row from table data.
 
-=== ON-OPEN-EDITOR
+==== ON-OPEN-EDITOR
 
 INTERNAL actor. Will open data editor of selected type. Uses ON-PLACE-EDITOR internal actor to determine editor placement.
 
-=== ON-FIND-CELL
+==== ON-FIND-CELL
 
 ARG: Y position in pixels.
 Return index of row under mouse cursor.
 
-=== ON-FIND-COL
+==== ON-FIND-COL
 
 ARG: X position in pixels
 Return index of column under mouse cursor.
 
-=== ON-SORT
+==== ON-SORT
 
 ARG: column index [integer!], direction [UP DOWN anything-else]
 Will sort table data. ON-SORT creates sorted index, original data are not changed.User can select by which column to sort and the direction of sort. Sort support |UP and DOWN directions, anything else (NONE is prefered but not required) will change the sorting index back to unsorted data.
 
-=== ON-GET-COL
+==== ON-GET-COL
 
 ARG: visible index
 Return index in data (Columns can be rearanged and ie. third visible column can be second in source data. This function will change visible index to real one).
 
-=== ON-FILTER-DATA
+==== ON-FILTER-DATA
 
 ARG: NONE (turn off filtering) or [column-index [integer!] filter [block!]]
 TODO: support multi-filters (filter with more than one column).
@@ -808,34 +808,34 @@ not none? value
 value/1 = #"a"
 ]
 
-=== ON-GET-VIEW and ON-GET-FLAT-VIEW
+==== ON-GET-VIEW and ON-GET-FLAT-VIEW
 
 ARG: block of indexes
 Return filtered view of table. NOTE: ON-GET-FLAT-VIEW actor will be removed soon.
 
-=== ON-SCROLL-LINE
+==== ON-SCROLL-LINE
 
 ARG: number of lines to scroll [integer!] - positive: scroll down, negative: scroll up
 Scroll table view by required number of lines.
 
-=== ON-GET-RECORD
+==== ON-GET-RECORD
 
 ARG: record id [integer!]
 Return value from table.
 
-=== ON-SET-VALUE
+==== ON-SET-VALUE
 
 ARG: value
 Will set value. NOTE: Value differs in TEXT-TABLE and TEXT-LIST, this actor hadles the differencies.
 
-=== ON-INIT-TABLE
+==== ON-INIT-TABLE
 
 Used by DB handler to clear table all indexes.
 === ON-ENTER and ON-EDIT-ACTION
 Actor is called when value is set in editor.
 	*
 
-=== ON-FILTER-DATA
+==== ON-FILTER-DATA
 
 ARG: NONE (turn off filtering) or [column-index [integer!] filter [block!]]
 
@@ -854,9 +854,11 @@ Example: all values starting with "A":
 
 == List of Vid Extension Kit Actor (All, including those LIST-VIEW specific)
 
+Vid Extension Kit as either generic or specific actors to the list-view component. I won't report it due to being it a general document. You can find LV accessors and actors specific information here:
+
 https://github.com/GiuseppeChillemi/VID-Extension-Kit/wiki/USR---Actors
 
-References:
+== References:
 
 Wiki and documentation for Vid Extension Kit
 https://github.com/GiuseppeChillemi/VID-Extension-Kit/wiki/USR---List

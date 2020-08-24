@@ -8,7 +8,7 @@ v0.95, 24/08/2020
 
 Displaying data organized as a list of rows and columns is a common way of consulting information and make a selection for the human being. Computers are a very powerful instrument for working on these lists which could be displayed, edited, stored and retrieved, and used as a starting point for further operations. 
 
-RED is the successor of REBOL and any developer needs to manage data grouped as rows and columns, so the request for the development of a LIST VIEW component, powerful enough for modern needings. Different programmers have started creating list managing components but they all are a prototypes.
+Red is the successor of REBOL and any developer needs to manage data grouped as rows and columns, so the request for the development of a LIST VIEW component, powerful enough for modern needings. Different programmers have started creating list managing components but they all are a prototypes.
 
 In the Rebol World, the most used lists are Vid Extension Kit, List-View VID Widget and R3 Text-Table. The first 2 have been created by Henrik Mikael Christensen @henrickmk and the last one by Boleslav Březovský (@rebolek). Note that R3 Text Table shares many of the designs and design influencers of the first two. This led to a common de-facto standard and shared functioning between projects and in the whole community.
 This Document is based on Vid Extension Kit and R3 Text Table specification.

@@ -75,7 +75,7 @@ Data has one or all of the following sources:
 
 === Geometry of the input type:
 
-In my experience, I have found the different list-view widgets support only geometrically identical rows (number of elements), while others accept variable geometry rows. Dixed cells should be the way to go.
+In my experience, I have found the different list-view widgets support only geometrically identical rows (number of elements), while others accept variable geometry rows. Fixed row lenght should be the way to go.
 
 === Direct or Indirect data
 

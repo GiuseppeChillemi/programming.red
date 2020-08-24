@@ -697,15 +697,15 @@ Actors are the API of List-view.
 
 R3 Text table has a Large range of actor, database editing actors 
 
-- On-data-load
-- On-refresh
-- On-reset
-- On-revisualize
-...
-
-on-cell-edited
-on-drag
-....
+* On-data-load
+* On-refresh
+* On-reset
+* On-revisualize
+.
+.
+.
+* on-cell-edited
+* on-drag
 
 ==== ON-INIT
 

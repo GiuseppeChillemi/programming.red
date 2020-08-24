@@ -259,7 +259,7 @@ If an output block is provided and a "string" is provided it will be the corresp
 
 ```
 data: [[1 2 3][5 6 7]]
-list-view data x input [a b c] output ["one" "two" "three"
+list-view data x input [a b c] output ["one" "two" "three"]
 ```
 
 Will produce
@@ -277,6 +277,7 @@ Also it will be produced by:
 ```
 data: [[1 2 3][5 6 7]]
 list-view data x input [a b c] output [a "one" b "two" c "three"]
+
 ```
 
 And
@@ -284,6 +285,7 @@ And
 ```
 data: [[1 2 3][5 6 7]]
 list-view data x input [a b c] output [a "one" #1 "two" b #2 "three" c #3]
+
 ```
 
 ==== Column size 

@@ -639,6 +639,7 @@ The List-View should support multiple skinning and working setups
 as in:
 
 https://www.telerik.com/products/winforms/gridview.aspx
+
 https://www.devexpress.com/products/net/controls/winforms/grid/
 
 == REFERENCE: what others have done!

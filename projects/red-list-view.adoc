@@ -351,6 +351,10 @@ The sorting column(s) should be highlighted
 
 Not all columns should come from the original data. Calculated virtual columns/data should be implemented. Their cells will have calculated content or graphic.
 
+==== Calculated virtual ROWS
+
+Rows are calculated by means of function
+
 === Cell Section
 
 ==== Cell apparence
@@ -630,6 +634,12 @@ The list-view should be modular and built from multiple faces
 
 The List-View should support multiple skinning and working setups
 
+=== Datagrid functionality
+
+as in:
+
+https://www.telerik.com/products/winforms/gridview.aspx
+https://www.devexpress.com/products/net/controls/winforms/grid/
 
 == REFERENCE: what others have done!
 

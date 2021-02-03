@@ -1,0 +1,311 @@
+   Jeff Kreis
+   REBOL Technologies
+   5-Feb-2001
+
+
+===PREZENTATION ENGINE
+
+  Animated presentations can be created by extending VID to include a
+  TIME and EFFECT dimension.  The presentation dialect allows you to
+  create layouts that have animated effects. 
+
+---Running the examples
+
+  Included with the presentation engine is a simple presentation
+  launcher script.  This script allows you to type in the name of a
+  file that contains a presentation layout and then run it.  This
+  allows you to make edits to the presentation as you go along,
+  hitting the "START" button periodically to see the results.  When
+  you are finished with your presentation, the presentation maker can
+  save your script to run on its own.  The presentation package
+  includes 10 short example scripts from this document in the
+  directory prez-ex/ (t1.r - t10.r).  You can specify these examples
+  in the file field of the presentation manager.  
+
+
+A presentation has this basic structure:
+
+size 400x400 [
+     [  ;- first scene
+         vid-styles 
+     ]
+     [ ;- second scene
+         more-vid-styles 0:0:0 [effects]
+     ]
+]
+
+or 
+size 200x200 [
+     ;- one and only one scene
+]
+
+Because the different items in the presentation may be moving around
+the screen, you must specify a size for the presentation screen.
+After specifying the size, the scenes follow.  You may have one block
+for a single scene, or a series of blocks inside the block folling the
+size declaration for multiple scenes.  When you use multiple scenes,
+they will each be played one after another, the next one starting when
+the previous one is done. 
+
+The scenes take the same format as as VID layout.  Anything included
+in the scene that is not subject to an appear time and an effect is
+presented in the same way that LAYOUT would treat it, for example, the
+following presentation:  (%prez-ex/t1.r)
+
+    size 300x300 [
+        backdrop black
+        h3 white "test"
+    ]
+
+... would be equivalent to viewing this layout:
+
+    view layout/size [backdrop black h3 white "test"] 300x300
+
+If you placed the presentation above in a file called tst.r, started
+make-prez and typed tst.r in the file field and pressed start you
+should see the same thing as you would if you typed into the console
+the one line viewed layout that follows the presentation.
+
+What this means is that items that you place in your scene will be
+originally placed on the page in the same easy fashion that layout
+places them.  You can use AT and ACROSS, BELOW, and GUIDE as you
+normally do in LAYOUT. 
+
+Basically the idea of the presentation engine is you can take any VID
+element and specify its appear time, any number of animated effects to
+be applied to it, each effect containing a start time for the effect
+and a duration of the effect and possibly some other information.
+
+Here is a simple example of a VID element that has an appear time and
+an effect applied to it:
+
+    txt font-size 20 "Hello" 0:0:0 [0:0:2 fade green 0:0:9]
+
+The above would create the text "Hello", which would appear at 0
+seconds after the start of the presentation.  Two seconds after the
+text appears it starts to fade to green taking nine seconds to make
+the transition.  You would see the above example by placing it within
+a scene in the presentation dialect, as below:  (t2.r)
+
+size 100x50 [
+    txt font-size 20 "Hello" 0:0:0 [0:0:2 fade green 0:0:9]
+]
+
+Currently the available effects are: FADE, FADE-UP, MOVE, ADD-EFFECTS,
+GO, and GROW.  GROW can also cause make an element shrink if provided
+with a pair that is smaller than the VID element being
+effected. FADE-UP is used for images, because images currently use the
+image effect BRIGHTEN to accomplish their fades (which means they
+won't look so hot on non black or white backgrounds.)  GO means to
+move the element to an absolute location in the page (specified as a
+pair).  MOVE means to move the element in a given direction (also
+specified as a pair, usually pairs with small numbers like: 1x0 (one
+pixel to the right) -3x3 (three pixels left, three pixels down)
+etc...  ADD-EFFECTS will be covered at the end of this document.
+
+Here is a simple presentation:  (t3.r)
+
+size 300x150 [
+    backdrop black
+    title white "Simple Presentation"
+    h1 black "Up we go"   0:0:0 [0:0:2 fade white 0:0:7]
+    h3 white "Fade to black" 0:0:0 [0:0:2 fade 0:0:7]
+]
+
+If you run the above presentation from make-prez, you should see the
+black backdrop, the white title text, and the text "Fade to black".
+Two seconds after the scene starts, the "Fade to black" text will
+start to do just that (taking seven seconds to complete the fade).
+Likewise, the text "Up we go" will fade from black to white, two
+seconds after the scene starts taking seven seconds to complete the
+fade.
+
+More than one animated effect can be applied to an item at a time.
+Here is an example of text that moves and fades simultaneously: (t4.r)
+
+size 300x150 [
+        backdrop blue
+        h2 white "So much to do so..."
+        h3 white "Off to work I go..." 0:0:0 [
+            0:0:1 move 1x0 0:0:5 0:0:1 fade blue 0:0:5
+        ]
+]
+
+The text "Off to work I go..." will begin to move to the right (1x0)
+one second after appearing.  The text will continue to move to the
+right for five seconds.  Also one second after the "off to work" text
+appears it will begin to fade to blue taking five seconds to complete
+its fade. 
+
+Of course, effects can be timed to occur sequentially as well, as in
+the following example:  (t5.r)
+
+size 300x150 [
+     backdrop yellow 0:0:0 [0:0:8 fade black 0:0:5]
+     h2 "Time flies" 0:0:1 [
+         0:0:0 go 200x100 0:0:2         
+         0:0:2 go 50x100  0:0:2
+         0:0:4 go 200x20  0:0:2
+         0:0:6 go 20x20   0:0:2
+         0:0:8 fade yellow 0:0:5
+     ]
+]
+
+The above example shows 
+As you see, above, the start times and durations of the four different
+GO effects are evenly spaced at for two seconds.  
+
+Custom effects can be made in the presentation dialect if you supply
+an "effects" block first.  An effects block takes the form of the word
+'effects followed by a block containing the name of a custom effect
+followed by one or more names of effects that the custom effect is
+derived from with a block specifying preset values for the custom
+effect.  Once a custom effect is defined, it may be refered to after
+specifying the appear time for an element. Here is an example of
+creating and using a custom effect:  (t6.r)
+
+effects [
+    qfade fade [fade-to: 140.0.0 duration: 0:0:2]
+]
+size 300x70 [
+     backdrop 140.0.0 across
+     h1 white     "Lights!" 0:0:1 qfade
+     h1 yellow    "Camera!" 0:0:2 qfade
+     h1 0.255.255 "Action!" 0:0:3 qfade
+]
+
+The above example defines a custom effect, QFADE. QFADE is derived
+from FADE taking two seconds to fade to the color 140.0.0.  The
+default start time is 0 seconds.  QFADE can then be used in the
+presentation layout.  The above presentation creates a dark red
+background.  One second after starting the words "Lights! Camera!
+Action!" appear one second appart (each a different color to begin
+with) and each word fades to the background color two seconds after it
+appears.
+
+A custom effect can be derived from more than one effect, allowing a
+series of effects to be specified.  Here is an example of a custom
+effect which used more than one base effect:  (t7.r)
+
+effects [ 
+    slow-fade-blue fade [fade-to: blue duration: 0:0:8]
+    slow-fade-blue-move-up fade [fade-to: blue duration: 0:0:8] 
+        move [start: 0:0:2 xy: 0x-2 duration: 0:0:8]
+]
+size 300x300 [
+    backdrop white
+    at 50x50 title "I feel blue" 0:0:1 slow-fade-blue
+    at 100x250 h1 "Up up and away!" 0:0:2 slow-fade-blue-move-up
+]
+
+The slow-fade-blue-move-up effect will fade to blue, two seconds after
+the VID element appears that is being effected. It will start to move
+up (0x-2) for 8 seconds.  
+
+Each custom effect is derived from one or more base effects, specified
+after declaring the effect, along with a block containing any of the
+following 
+
+    start:       (time!)
+    fade-to:     (tuple!)
+    xy:          (pair!)
+    fade-facet:  ('text , 'body , 'edge or 'full)
+    duration:    (time!)
+    effects:     (block!)
+
+FADE-FACET is either 'text, 'body, 'edge or 'full which specifies
+which facet of the VID item you would like the effect to apply to
+(allowing you to independently fade an element's text or it's body,
+edge, or all of them together).
+
+Here is an example of fading a button's text to one color, while
+fading the button's body to a different color: (t8.r)
+
+effects [
+    crazy-button fade [
+        fade-to: yellow duration: 0:0:5 fade-facet: 'text
+    ] fade [
+        fade-to: 200.30.0 duration: 0:0:4 fade-facet: 'body
+    ]
+]
+size 250x80 [
+    backdrop 50.90.130
+    across 
+    button "Click" [request/ok "bingo!"] 0:0:0 crazy-button
+    button "me" [request/ok "Zip!"] 0:0:0 crazy-button
+]
+
+Yes, the buttons in the above presentation work. All VID elements used
+in a presentation will be fully functional.
+
+---Incremental Effects
+
+You can incrementally apply some effects to a VID element.  The
+effects are applied one after another evenly spaced by the duration
+time.  Here is a fun example:  (t9.r)
+
+size 300x300 [
+   origin 0x0
+   image %space.jpg 300x300 0:0:0 [
+       0:0:1 add-effects [
+           [blur]
+           [reflect -1x1]
+           [brighten 100]
+           [colorize 200.120.10]
+           [tint -120]
+           [gradcol 1x1 255.255.255 0.0.0]
+           [contrast 15]
+           [draw [pen white text 20x25 "Groovy"]]
+       ] 0:0:1
+   ]
+]
+
+You may also specify the times for things to occur before each effect
+chunk block.  For example:  (t10.r)
+
+
+size 300x300 [
+   origin 0x0
+   image %space.jpg 300x300 0:0:0 [
+       0:0:1 add-effects [
+           0:0:0.5   [blur]
+           0:0:1     [reflect -1x1]
+           0:0:2     [colorize 200.120.10]
+           0:0:4     [tint -120]
+           0:0:2.5   [gradcol 1x1 255.255.255 0.0.0]
+           0:0:4     [contrast 15]
+           0:0:2     [draw [pen white text 20x45 "Groovy"]]
+           0:0:1     [draw [pen white line 20x60 80x60]]
+           0:0:2     [draw [pen red circle 150x150 90]]
+       ] 0:0:1
+       0:0:6 fade 0:0:1
+   ]
+]
+
+The above example shows how ADD-EFFECTS allows you to have effects
+apply at varying times.  Some of the effect chunks above are specified
+for the same time so they will occur simultaneously.  You can also
+see that you can use DRAW effects incrementally. 
+
+===CURRENT LIMITATIONS
+
+Right now, using STYLE in a layout seems to goof up the presentation
+engine which is an unfortunate limitation. A little hacking should
+remedy the problem. 
+
+Another important limitation is that the custom effects can't accept
+arguments in the scene layout which makes them static.  Custom effects
+should be able to accept different facet arguments in much the same
+manner as VID does. This limitation to custom effects also should be
+fixable with a little more work.
+
+One other issue with custom effects is that one custom effect can not
+be defined and then subsequently used as the base effect for another
+custom effect.  Yet a little more hacking can fix that.
+
+Lastly, more effects are needed.  Planned effects include a simple
+incremental drawing ability, transitional effects between scenes, and
+more.
+
+
+
